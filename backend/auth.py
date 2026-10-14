@@ -10,7 +10,7 @@ import secrets
 import sqlite3
 
 ITERACIONES = 120_000
-LONGITUD_MINIMA = 8
+LONGITUD_MINIMA = 9
 LONGITUD_SALT = 16
 
 # Rutas resueltas a partir de __file__ para que funcionen sin importar el

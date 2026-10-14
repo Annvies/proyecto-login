@@ -100,8 +100,9 @@ class TestValidaciones(unittest.TestCase):
         self.assertTrue(auth.validar_email("a@b.c"))
 
     def test_password_longitud_minima(self):
-        self.assertTrue(auth.validar_password("12345678"))  # 8
+        self.assertTrue(auth.validar_password("123456789"))  # 9 (nuevo mínimo)
         self.assertTrue(auth.validar_password("1234567890"))
+        self.assertFalse(auth.validar_password("12345678"))  # 8 ya no válido
         self.assertFalse(auth.validar_password("1234567"))  # 7
         self.assertFalse(auth.validar_password(""))
         self.assertFalse(auth.validar_password("corta"))
