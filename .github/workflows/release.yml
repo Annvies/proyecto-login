@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Generate version tag
+        id: version
+        run: |
+          DATE=$(date +'%Y.%m.%d')
+          COMMIT_SHORT=$(git rev-parse --short HEAD)
+          echo "tag=v${DATE}-${COMMIT_SHORT}" >> $GITHUB_OUTPUT
+
+      - name: Create Git tag
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = '${{ steps.version.outputs.tag }}';
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `refs/tags/${tag}`,
+              sha: context.sha
+            });
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Release ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
