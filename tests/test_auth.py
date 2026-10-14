@@ -23,7 +23,7 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from backend import app, auth  # noqa: E402
+from backend import app, auth
 
 
 class TestHashPassword(unittest.TestCase):
@@ -171,7 +171,7 @@ class TestEndToEnd(unittest.TestCase):
         ruta_db = os.path.join(cls.temporal.name, "login_http.db")
         cls.servidor = app.crear_servidor(puerto=0, ruta_db=ruta_db)
         host, puerto = cls.servidor.server_address[:2]
-        cls.base = "http://{0}:{1}".format(host, puerto)
+        cls.base = f"http://{host}:{puerto}"
         cls.hilo = threading.Thread(target=cls.servidor.serve_forever, daemon=True)
         cls.hilo.start()
 
@@ -185,7 +185,7 @@ class TestEndToEnd(unittest.TestCase):
 
     # --- utilidades -----------------------------------------------------
     def email_unico(self):
-        return "user-{0}@correo.com".format(uuid.uuid4().hex)
+        return f"user-{uuid.uuid4().hex}@correo.com"
 
     def _post(self, ruta, cuerpo):
         datos = json.dumps(cuerpo).encode("utf-8")
@@ -308,7 +308,6 @@ class TestNuevos(unittest.TestCase):
             self.assertGreaterEqual(len(t), 32)
 
     def test_password_complejidad_opcional(self):
-        from backend import auth
         def validar_password_compleja(pwd):
             if not isinstance(pwd, str) or len(pwd) < 8:
                 return False

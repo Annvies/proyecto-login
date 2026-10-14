@@ -10,8 +10,6 @@ Bloquea el push (exit 2) para que el usuario decida y aplique el fix.
 import re
 import subprocess
 import sys
-from pathlib import Path
-
 
 TEST_INTENCIONAL = "test_password_minima_rechazada"
 TEST_CLASS = "TestNuevos"
@@ -32,6 +30,7 @@ def correr_tests():
             encoding="utf-8",
             errors="replace",
             timeout=120,
+            check=False,
         )
         return resultado.returncode, resultado.stdout, resultado.stderr
     except (OSError, subprocess.TimeoutExpired) as e:
