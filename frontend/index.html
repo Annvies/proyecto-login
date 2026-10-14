@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso de usuarios</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="tarjeta" aria-labelledby="titulo">
+    <h1 id="titulo">Iniciar sesión</h1>
+
+    <div class="pestanas" role="tablist" aria-label="Elige una opción de acceso">
+      <button id="tab-login" class="pestana activa" type="button" role="tab"
+              aria-selected="true" aria-controls="formulario">Entrar</button>
+      <button id="tab-registro" class="pestana" type="button" role="tab"
+              aria-selected="false" aria-controls="formulario">Registrarse</button>
+    </div>
+
+    <form id="formulario" novalidate aria-label="Formulario de acceso">
+      <div class="campo">
+        <label for="email">Correo electrónico</label>
+        <input id="email" name="email" type="email" autocomplete="email" required
+               placeholder="usuario@dominio.com" aria-label="Correo electrónico">
+      </div>
+
+      <div class="campo">
+        <label for="password">Contraseña</label>
+        <input id="password" name="password" type="password" autocomplete="current-password"
+               required minlength="8" placeholder="Mínimo 8 caracteres"
+               aria-label="Contraseña" aria-describedby="ayuda-password">
+        <small id="ayuda-password" class="ayuda">Mínimo 8 caracteres.</small>
+      </div>
+
+      <button id="enviar" type="submit">Entrar</button>
+    </form>
+
+    <p id="mensaje" role="alert" aria-live="polite"></p>
+
+    <section id="perfil" class="perfil" hidden aria-label="Perfil del usuario">
+      <h2>Tu perfil</h2>
+      <p class="perfil-correo">Sesión iniciada como <strong id="correo-perfil"></strong></p>
+      <button id="cerrar-sesion" type="button">Cerrar sesión</button>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>

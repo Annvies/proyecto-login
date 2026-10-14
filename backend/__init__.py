@@ -1,0 +1,1 @@
+"""Paquete backend del login (autenticación + servidor HTTP)."""
