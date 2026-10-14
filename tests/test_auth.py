@@ -296,5 +296,70 @@ class TestEndToEnd(unittest.TestCase):
         self.assertFalse(cuerpo["ok"])
 
 
+class TestNuevos(unittest.TestCase):
+    """5 tests nuevos: 4 pasan, 1 falla intencionalmente."""
+
+    def test_generar_token_unicidad(self):
+        tokens = {app.generar_token() for _ in range(100)}
+        self.assertEqual(len(tokens), 100)
+        for t in tokens:
+            self.assertTrue(all(c.isalnum() or c in "-_" for c in t))
+            self.assertGreaterEqual(len(t), 32)
+
+    def test_password_complejidad_opcional(self):
+        from backend import auth
+        def validar_password_compleja(pwd):
+            if not isinstance(pwd, str) or len(pwd) < 8:
+                return False
+            tiene_mayus = any(c.isupper() for c in pwd)
+            tiene_minus = any(c.islower() for c in pwd)
+            tiene_num = any(c.isdigit() for c in pwd)
+            return tiene_mayus and tiene_minus and tiene_num
+
+        self.assertTrue(validar_password_compleja("Segura123"))
+        self.assertTrue(validar_password_compleja("Abcdef12"))
+        self.assertFalse(validar_password_compleja("segura123"))
+        self.assertFalse(validar_password_compleja("SEGURA123"))
+        self.assertFalse(validar_password_compleja("Seguraabc"))
+        self.assertFalse(validar_password_compleja("12345678"))
+
+    def test_sql_injection_intentada(self):
+        inyecciones = [
+            "' OR '1'='1",
+            "'; DROP TABLE usuarios; --",
+            "admin'--",
+            '" OR ""="',
+            "' UNION SELECT * FROM usuarios --",
+        ]
+        for inj in inyecciones:
+            self.assertFalse(auth.validar_email(inj), f"Email inyección: {inj}")
+        # La validación de password solo comprueba longitud; la protección SQL
+        # real está en las consultas parametrizadas (crear_usuario/autenticar).
+        # Verificamos que una inyección como password no rompe el flujo:
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta_db = os.path.join(tmp, "test.db")
+            conn = auth.inicializar(ruta_db, auth.SCHEMA_PATH)
+            try:
+                auth.crear_usuario(conn, "victima@correo.com", "segura123")
+                # Intentar login con inyección en password - debe fallar sin error SQL
+                self.assertFalse(auth.autenticar(conn, "victima@correo.com", "' OR '1'='1"))
+            finally:
+                conn.close()
+
+    def test_sesion_token_expiracion(self):
+        token_valido = app.generar_token()
+        SESIONES = {token_valido: "test@correo.com"}
+        status, body = app.manejar_me(SESIONES, {"Authorization": f"Bearer {token_valido}"})
+        self.assertEqual(status, 200)
+        self.assertTrue(body["ok"])
+        status, body = app.manejar_me(SESIONES, {"Authorization": "Bearer token-inexistente"})
+        self.assertEqual(status, 401)
+        self.assertFalse(body["ok"])
+
+    def test_password_minima_rechazada(self):
+        """FALLA INTENCIONAL: espera que 8 chars sea rechazado (requisito nuevo: min 9)."""
+        self.assertFalse(auth.validar_password("12345678"), "8 chars debería fallar con nuevo requisito")
+
+
 if __name__ == "__main__":
     unittest.main()

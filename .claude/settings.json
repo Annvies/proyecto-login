@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \"$CLAUDE_PROJECT_DIR/.claude/hooks/verificar_tests_push.py\" \"$TOOL_ARGS\"",
+            "timeout": 120,
+            "statusMessage": "Hook: verificando tests antes del push..."
+          }
+        ]
+      }
+    ]
+  }
+}
